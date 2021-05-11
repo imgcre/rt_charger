@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "name": "STM32",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "gcc",
+                "HAVE_SIGVAL",
+                "HAVE_SIGEVENT",
+                "HAVE_SIGINFO"
+            ],
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++20",
+            "intelliSenseMode": "linux-gcc-arm",
+            "compilerArgs": [
+                "-mcpu=cortex-m3",
+                "-mthumb",
+                "-ffunction-sections",
+                "-fdata-sections"
+            ],
+            "compilerPath": "${env:RTT_EXEC_PATH}/arm-none-eabi-gcc"
+        }
+    ],
+    "version": 4
+}
