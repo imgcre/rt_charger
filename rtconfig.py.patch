@@ -1,4 +1,0 @@
-47c47
-<     CFLAGS = DEVICE + ' -Dgcc'
----
->     CFLAGS = DEVICE + ' -Dgcc -DHAVE_SIGVAL -DHAVE_SIGEVENT -DHAVE_SIGINFO'
