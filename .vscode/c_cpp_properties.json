@@ -1,26 +1,47 @@
 {
     "configurations": [
         {
-            "name": "STM32",
-            "includePath": [
-                "${workspaceFolder}/**"
-            ],
+            "name": "Win32",
             "defines": [
-                "gcc",
-                "HAVE_SIGVAL",
-                "HAVE_SIGEVENT",
-                "HAVE_SIGINFO"
+                "HAVE_CCONFIG_H",
+                "RT_USING_NEWLIB",
+                "STM32F103xB",
+                "USE_HAL_DRIVER",
+                "__RTTHREAD__"
             ],
-            "cStandard": "gnu17",
-            "cppStandard": "gnu++20",
-            "intelliSenseMode": "linux-gcc-arm",
-            "compilerArgs": [
-                "-mcpu=cortex-m3",
-                "-mthumb",
-                "-ffunction-sections",
-                "-fdata-sections"
-            ],
-            "compilerPath": "${env:RTT_EXEC_PATH}/arm-none-eabi-gcc"
+            "intelliSenseMode": "clang-x64",
+            "compilerPath": "/usr/lib/gcc/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi-gcc",
+            "cStandard": "c99",
+            "cppStandard": "c++20",
+            "includePath": [
+                "/root/projects/stm32f10x",
+                "/root/projects/stm32f10x/applications",
+                "/root/projects/stm32f10x/board",
+                "/root/projects/stm32f10x/board/CubeMX_Config/Inc",
+                "/root/projects/stm32f10x/configs",
+                "/root/projects/stm32f10x/devices",
+                "/root/projects/stm32f10x/hal",
+                "/root/projects/stm32f10x/libraries/HAL_Drivers",
+                "/root/projects/stm32f10x/libraries/HAL_Drivers/config",
+                "/root/projects/stm32f10x/libraries/STM32F1xx_HAL/CMSIS/Device/ST/STM32F1xx/Include",
+                "/root/projects/stm32f10x/libraries/STM32F1xx_HAL/CMSIS/Include",
+                "/root/projects/stm32f10x/libraries/STM32F1xx_HAL/STM32F1xx_HAL_Driver/Inc",
+                "/root/projects/stm32f10x/os",
+                "/root/projects/stm32f10x/rt-thread/components/cplusplus",
+                "/root/projects/stm32f10x/rt-thread/components/drivers/include",
+                "/root/projects/stm32f10x/rt-thread/components/drivers/spi",
+                "/root/projects/stm32f10x/rt-thread/components/drivers/spi/sfud/inc",
+                "/root/projects/stm32f10x/rt-thread/components/finsh",
+                "/root/projects/stm32f10x/rt-thread/components/libc/compilers/common",
+                "/root/projects/stm32f10x/rt-thread/components/libc/compilers/newlib",
+                "/root/projects/stm32f10x/rt-thread/include",
+                "/root/projects/stm32f10x/rt-thread/libcpu/arm/common",
+                "/root/projects/stm32f10x/rt-thread/libcpu/arm/cortex-m3",
+                "/root/projects/stm32f10x/termios",
+                "/root/projects/stm32f10x/tests",
+                "/root/projects/stm32f10x/ui",
+                "/root/projects/stm32f10x/utilities"
+            ]
         }
     ],
     "version": 4

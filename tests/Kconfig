@@ -1,0 +1,36 @@
+
+
+menu "App Config"
+    config USING_APP
+        bool "Run application"
+        default n
+
+    menuconfig USING_TESTS
+        bool "Enable Tests"
+        default n
+        if USING_TESTS
+            menu "Devices"
+                config TEST_DEVICES_WTN6
+                    bool "Enable Wtn6 test"
+                    default n
+                config TEST_DEVICES_RC522
+                    bool "Enable Rc522 test"
+                    default n
+                config TEST_DEVICES_WS2812
+                    bool "Enable Ws2812 test"
+                    default n
+                config TEST_DEVICES_RELAY
+                    bool "Enable Relay test"
+                    default n
+                config TEST_DEVICES_LOAD_DETECTOR
+                    bool "Enable LoadDetector test"
+                    default n
+            endmenu
+            menu "Hal"
+                config TEST_HAL_PORT
+                    bool "Enable Port test"
+                    default n
+            endmenu
+        endif
+endmenu
+

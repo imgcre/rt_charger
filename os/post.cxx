@@ -8,7 +8,7 @@ void Post::poll(PollType type) {
     //if(没有注册) throw;
     //rt_event_recv(event.get(), Events::ConnackOk, RT_EVENT_FLAG_AND | RT_EVENT_FLAG_CLEAR, RT_WAITING_FOREVER, RT_NULL);
 
-    auto guard = shared_ptr<void>(nullptr, [=](auto) {
+    auto guard = shared_ptr<void>(nullptr, [this](auto) {
         pollingThread = nullptr;
     });
     pollingThread = rt_thread_self();

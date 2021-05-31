@@ -6,7 +6,7 @@
 			"label": "build",
 			"command": "scons",
 			"args": [
-				"-j32"
+				"-j40"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"
@@ -16,7 +16,7 @@
 			],
 			"group": "build",
 			"dependsOn": [
-				"sync_compiler_flags"
+				// "sync_compiler_flags"
 			]
 		},
 		{
@@ -29,6 +29,101 @@
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"type": "shell",
+			"label": "run anno",
+			"command": "python",
+			"args": [
+				"scripts/run_anno.py",
+				"${file}"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"type": "shell",
+			"label": "gen_app_config",
+			"command": "python",
+			"args": [
+				"scripts/gen_app_config.py"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"type": "shell",
+			"label": "menuconfig",
+			"command": "scons",
+			"args": [
+				"--menuconfig"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "none",
+			"dependsOn": [
+				"gen_app_config"
+			],
+			"presentation": {
+				"panel": "shared",
+				"reveal": "always",
+				"focus": true
+			},
+			"problemMatcher": []
+		},
+		{
+			"type": "shell",
+			"label": "gen_cmake",
+			"command": "scons",
+			"args": [
+				"--target=cmake"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"dependsOn": [
+				"menuconfig"
+			],
+			"problemMatcher": []
+		},
+		{
+			"type": "shell",
+			"label": "gen_vsc",
+			"command": "scons",
+			"args": [
+				"--target=vsc"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"dependsOn": [
+				"gen_cmake"
+			],
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"type": "shell",
+			"label": "config",
+			"command": "python",
+			"args": [
+				"scripts/patch_settings.py"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"dependsOn": [
+				"gen_vsc"
+			],
 			"group": "build",
 			"problemMatcher": []
 		},
