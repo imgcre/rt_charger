@@ -5,8 +5,8 @@
 /* Program Entry, set to mark it as "used" and avoid gc */
 MEMORY
 {
-    ROM (rx) : ORIGIN = 0x08000000, LENGTH = 512k /* 128KB flash */
-    RAM (rw) : ORIGIN = 0x20000000, LENGTH =  64k /* 20K sram */
+    ROM (rx) : ORIGIN = 0x08000000, LENGTH = 256k /* 128KB flash */
+    RAM (rw) : ORIGIN = 0x20000000, LENGTH =  48k /* 20K sram */
 }
 ENTRY(Reset_Handler)
 _system_stack_size = 0x200;
@@ -58,15 +58,17 @@ SECTIONS
     } > ROM = 0
 
     /* .ARM.exidx is sorted, so has to go in its own output section.  */
-    __exidx_start = .;
+    
     .ARM.exidx :
     {
+        __exidx_start = .;
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
 
         /* This is used by the startup in order to initialize the .data secion */
         _sidata = .;
+        __exidx_end = .;
     } > ROM
-    __exidx_end = .;
+    
 
     /* .data section which is used for initialized data */
 
