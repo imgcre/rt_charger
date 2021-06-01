@@ -52,12 +52,12 @@ if PLATFORM == 'gcc':
     LPATH = ''
 
     if BUILD == 'debug':
-        CFLAGS += ' -O2 -gdwarf-2 -g'
+        CFLAGS += ' -Og -gdwarf-2 -g'
         AFLAGS += ' -gdwarf-2'
     else:
         CFLAGS += ' -O2'
 
-    CXXFLAGS = CFLAGS + ' -std=gnu++20'
+    CXXFLAGS = CFLAGS + ' -std=gnu++20 -fabi-version=0 -fno-threadsafe-statics -static -s -ftemplate-backtrace-limit=0 -fexceptions'
 
     POST_ACTION = OBJCPY + ' -O binary $TARGET rtthread.bin\n' + SIZE + ' $TARGET \n'
 

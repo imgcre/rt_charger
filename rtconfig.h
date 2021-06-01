@@ -116,6 +116,12 @@
 
 /* AT commands */
 
+#define RT_USING_AT
+#define AT_USING_CLIENT
+#define AT_CLIENT_NUM_MAX 1
+#define AT_USING_CLI
+#define AT_CMD_MAX_LEN 2048
+#define AT_SW_VERSION_NUM 0x10301
 
 /* VBUS(Virtual Software BUS) */
 
@@ -194,9 +200,18 @@
 
 /* Devices */
 
-#define TEST_DEVICES_RC522
+#define TEST_DEVICES_AIR302
 
 /* Hal */
+
+
+/* Pkgs */
+
+
+/* Temp */
+
+
+/* Termios */
 
 
 #endif
