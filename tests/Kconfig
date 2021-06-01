@@ -10,25 +10,43 @@ menu "App Config"
         default n
         if USING_TESTS
             menu "Devices"
-                config TEST_DEVICES_WTN6
-                    bool "Enable Wtn6 test"
+                config TEST_DEVICES_LOAD_DETECTOR
+                    bool "Enable LoadDetector test"
                     default n
                 config TEST_DEVICES_RC522
                     bool "Enable Rc522 test"
                     default n
-                config TEST_DEVICES_WS2812
-                    bool "Enable Ws2812 test"
-                    default n
                 config TEST_DEVICES_RELAY
                     bool "Enable Relay test"
                     default n
-                config TEST_DEVICES_LOAD_DETECTOR
-                    bool "Enable LoadDetector test"
+                config TEST_DEVICES_WS2812
+                    bool "Enable Ws2812 test"
+                    default n
+                config TEST_DEVICES_WTN6
+                    bool "Enable Wtn6 test"
+                    default n
+                config TEST_DEVICES_AIR302
+                    bool "Enable Air302 test"
                     default n
             endmenu
             menu "Hal"
                 config TEST_HAL_PORT
                     bool "Enable Port test"
+                    default n
+            endmenu
+            menu "Pkgs"
+                config TEST_PKGS_AT
+                    bool "Enable At test"
+                    default n
+            endmenu
+            menu "Temp"
+                config TEST_TEMP_WHATEVER
+                    bool "Enable Whatever test"
+                    default n
+            endmenu
+            menu "Termios"
+                config TEST_TERMIOS_CMD
+                    bool "Enable Cmd test"
                     default n
             endmenu
         endif

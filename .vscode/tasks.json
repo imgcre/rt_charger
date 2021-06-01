@@ -82,21 +82,6 @@
 		},
 		{
 			"type": "shell",
-			"label": "gen_cmake",
-			"command": "scons",
-			"args": [
-				"--target=cmake"
-			],
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
-			"dependsOn": [
-				"menuconfig"
-			],
-			"problemMatcher": []
-		},
-		{
-			"type": "shell",
 			"label": "gen_vsc",
 			"command": "scons",
 			"args": [
@@ -106,7 +91,7 @@
 				"cwd": "${workspaceFolder}"
 			},
 			"dependsOn": [
-				"gen_cmake"
+				"menuconfig"
 			],
 			"group": "build",
 			"problemMatcher": []
