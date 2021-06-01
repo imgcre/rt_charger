@@ -31,6 +31,8 @@ void Cmd::operator()(std::function<void(Cmd& cmd)> cb) {
         cb(*this);
     } catch(const exception& e) {
         rt_kprintf("cmd err: %s\n", e.what());
+    } catch(...) {
+        rt_kprintf("unknown err occured\n");
     }
 }
 
