@@ -1,10 +1,12 @@
 #include <rtthread.h>
 #include <board.h>
+#include <cstddef>
 #include <devices/wtn6.hxx>
 #include <devices/rc522.hxx>
 #include <devices/ws2812.hxx>
 #include <devices/relay.hxx>
 #include <devices/load_detector.hxx>
+#include <devices/air302.hxx>
 
 namespace Preset {
 
@@ -24,5 +26,9 @@ template<> const rt_base_t Relay<1>::kPin = GET_PIN(B, 6);
 
 template<> const rt_base_t LoadDetector<0>::kPin = GET_PIN(C, 8);
 template<> const rt_base_t LoadDetector<1>::kPin = GET_PIN(B, 5);
+
+const char* Air302::KdeviceName = "uart2";
+std::size_t Air302::KbufSize = 512;
+rt_base_t Air302::KpwrPin = GET_PIN(B, 2);
 
 }
