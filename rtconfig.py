@@ -57,7 +57,7 @@ if PLATFORM == 'gcc':
     else:
         CFLAGS += ' -O2'
 
-    CXXFLAGS = CFLAGS + ' -std=gnu++20 -fabi-version=0 -fno-threadsafe-statics -static -s -ftemplate-backtrace-limit=0 -fexceptions'
+    CXXFLAGS = CFLAGS + ' -std=gnu++20 -fabi-version=0 -fno-threadsafe-statics -static -s -ftemplate-backtrace-limit=0 -fexceptions -frtti -fpermissive'
 
     POST_ACTION = OBJCPY + ' -O binary $TARGET rtthread.bin\n' + SIZE + ' $TARGET \n'
 

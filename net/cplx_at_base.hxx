@@ -1,5 +1,6 @@
 #pragma once
 #include "at.hxx"
+#include "at_error.hxx"
 #include "at_comp_base.hxx"
 #include <stdexcept>
 #include <memory>
@@ -14,13 +15,13 @@ class CplxAtBase: public At {
     template<class T>
     static std::shared_ptr<T> getCompFromUrc(at_client_t client) {
         if(!comps.contains(client))
-            throw std::runtime_error{"client not found"};
+            throw AtCompError{"client not found"};
 
         for(const auto& comp: comps[client]) {
             auto locked = comp.lock();
             if(locked == nullptr) continue;
             if(typeid(*locked) == typeid(T)) {
-                return locked;
+                return std::dynamic_pointer_cast<T>(locked);
             }
         }
         return nullptr;

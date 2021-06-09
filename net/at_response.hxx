@@ -3,10 +3,11 @@
 #include <cstddef>
 #include <memory>
 #include <stdexcept>
+#include <chrono>
 
 class AtResponse {
   public:
-    AtResponse(uint32_t timeout = kTimeout, std::size_t bufSize = kBufSize, std::size_t lineNum = kLineNum);
+    AtResponse(std::chrono::milliseconds timeout = kTimeout, std::size_t bufSize = kBufSize, std::size_t lineNum = kLineNum);
     at_response_t getObj();
 
     template<class... Args>
@@ -27,5 +28,5 @@ class AtResponse {
     std::shared_ptr<at_response> obj;
   public:
     static constexpr std::size_t kBufSize = 512, kLineNum = 0;
-    static constexpr uint32_t kTimeout = 1000;
+    static constexpr std::chrono::milliseconds kTimeout = std::chrono::seconds(1);
 };

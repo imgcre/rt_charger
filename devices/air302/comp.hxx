@@ -4,9 +4,5 @@
 
 namespace Air302N {
 template<class T>
-class Comp: public AtComp<T, CompBase> {
-    using AtComp<T, CompBase>::AtComp;
-  protected:
-    using Base = Comp<T>;
-};
+using Comp = AtComp<T, CompBase>;
 }

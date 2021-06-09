@@ -2,10 +2,10 @@
 #include <string>
 using namespace std;
 
-AtError::AtError(int errCode): runtime_error("at error: " + to_string(errCode)), errorCode(errCode) {
+AtExecError::AtExecError(int errCode): AtError("at error: " + to_string(errCode)), errorCode(errCode) {
 
 }
 
-int AtError::getCode() {
+int AtExecError::getCode() {
     return errorCode;
 }

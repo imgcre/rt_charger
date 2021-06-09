@@ -28,7 +28,7 @@ template<> const rt_base_t LoadDetector<0>::kPin = GET_PIN(C, 8);
 template<> const rt_base_t LoadDetector<1>::kPin = GET_PIN(B, 5);
 
 const char* Air302::KdeviceName = "uart2";
-std::size_t Air302::KbufSize = 512;
+std::size_t Air302::KbufSize = 1024;
 rt_base_t Air302::KpwrPin = GET_PIN(B, 2);
 
 }
