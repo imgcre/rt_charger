@@ -46,3 +46,12 @@ private:
     return table[i](std::addressof(f), std::forward<Args>(args)...);
   }
 };
+
+template<class T, template<class...> class Template>
+struct IsSpecOf: std::false_type {};
+
+template<template<class...> class Template, class... Args>
+struct IsSpecOf<Template<Args...>, Template>: std::true_type {};
+
+template<class T, template<class...> class Template>
+concept SpecOf = IsSpecOf<T, Template>::value;
