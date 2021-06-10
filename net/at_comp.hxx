@@ -8,7 +8,7 @@
 #include "at_urc_builder.hxx"
 
 //每种类型的comp同时只能存在一个实例
-template<class T, class U = AtCompBase> requires std::derived_from<U, AtCompBase>
+template<class T, std::derived_from<AtCompBase> U = AtCompBase>
 class AtComp: public U {
     using U::U;
     //friend class AtUrcBuilder<T>;

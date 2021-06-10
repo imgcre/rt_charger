@@ -14,7 +14,7 @@ T parse(std::string_view sv) {
     return t;
 }
 
-template<class T> requires std::same_as<T, std::string_view>
+template<std::same_as<std::string_view> T>
 T parse(std::string_view sv) {
     return sv;
 }
