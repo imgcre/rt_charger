@@ -1,15 +1,18 @@
 #pragma once
 #include <cstdint>
-#include "port.hxx"
+#include "port_base.hxx"
 #include "raw_port.hxx"
+#include <configs/bsp.hxx>
 
 class RawPort;
 
-class AbsPort: public Port {
-    using Port::Port;
+class AbsPort: public PortBase {
+    using PortBase::PortBase;
   public:
-    operator RawPort() const;
-    virtual bool validate() const final;
-
-
+    constexpr operator RawPort() const;
+    bool validate() const;
 };
+
+constexpr AbsPort operator "" _ap(unsigned long long n) {
+  return AbsPort{(uint8_t)n};
+}

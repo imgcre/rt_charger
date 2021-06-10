@@ -201,7 +201,7 @@
 
 /* Devices */
 
-#define TEST_DEVICES_AIR302
+#define TEST_DEVICES_RELAY
 
 /* Hal */
 

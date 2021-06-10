@@ -1,8 +1,6 @@
 #include "abs_port.hxx"
 #include <cstdint>
-AbsPort::operator RawPort() const {
-    return RawPort{uint8_t(value - 1)};
-}
+#include "port.hxx"
 
 bool AbsPort::validate() const {
     return ((RawPort)*this).validate();

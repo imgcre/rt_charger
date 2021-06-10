@@ -4,6 +4,9 @@
 #include <deque>
 #include <type_traits>
 #include <functional>
+#include <concepts>
+#include <hal/port.hxx>
+#include <stdexcept>
 
 class Cmd {
 public:
@@ -14,6 +17,15 @@ public:
     template<class T>
     auto get(const char* name = nullptr) -> std::enable_if_t<std::is_integral_v<T> || std::is_enum_v<T>, T> {
         return (T)atoi(getFrom(name));
+    }
+
+    template<std::same_as<Port> T>
+    auto get(const char* name = nullptr) {
+        auto result = AbsPort(atoi(getFrom(name)));
+        if(!result.validate()) {
+            throw std::runtime_error{"port out of range"};
+        }
+        return result;
     }
 
     template<class T>

@@ -36,10 +36,11 @@ private:
 
 #include <utilities/singleton.hxx>
 #include <configs/bsp.hxx>
+#include <hal/port.hxx>
 namespace Preset {
-template<int R>
-class LoadDetector: public Singleton<LoadDetector<R>>, public Config::Bsp::assert_t<::LoadDetector, R> {
-    friend class Singleton<LoadDetector<R>>;
+template<AbsPort R>
+class LoadDetector: public Singleton<LoadDetector<R>, ::LoadDetector> {
+    friend class Singleton<LoadDetector<R>, ::LoadDetector>;
     LoadDetector(): ::LoadDetector(kPin) {}
     static const rt_base_t kPin;
 };
