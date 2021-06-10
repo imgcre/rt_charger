@@ -1,11 +1,16 @@
 #include <rtthread.h>
 #include <stdexcept>
 #include "test.hxx"
+#include <exception>
 
 using namespace std;
 
 Test::Test() {
     throw runtime_error{"test will throw"};
+}
+
+namespace __cxxabiv1 {
+    std::terminate_handler __terminate_handler = []{ while(true); };
 }
 
 extern "C"
