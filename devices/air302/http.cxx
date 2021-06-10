@@ -10,12 +10,18 @@ using namespace chrono_literals;
 void Http::onUrcBuild(Builder& builder) {
     builder
         .set(slots, event)
-        .probe<"+HTTPRESPC:", Builder::kEndl>(
-            [](EventBuilder<Events::Values> e, std::shared_ptr<Flow> flow, int flag, int len, int blen, std::string_view buf) {
-                flow->appendBuf(buf);
-                if(flag == 0) e << Events::ResponseContentDone;
-            }
-        );
+        // .probe<"+HTTPRESPC:", Builder::kEndl>(
+        //     [](EventEmitter<Events::Values> e, std::shared_ptr<Flow> flow, int flag, int len, int blen, std::string_view buf) {
+        //         flow->appendBuf(buf);
+        //         if(flag == 0) e << Events::ResponseContentDone;
+        //     }
+        // );
+        .probe<"+HTTPRESPC:", Builder::kEndl>(&Http::onResponseContent);
+}
+
+void Http::onResponseContent(EventEmitter<Events::Values> e, std::shared_ptr<Flow> flow, int flag, int len, int blen, std::string_view buf) {
+    flow->appendBuf(buf);
+    if(flag == 0) e << Events::ResponseContentDone;
 }
 
 string Http::send(HttpRequest request) {

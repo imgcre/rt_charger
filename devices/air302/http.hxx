@@ -61,6 +61,8 @@ class Http: public Comp<Http>, public std::enable_shared_from_this<Http>, public
     friend class Flow;
 
   private:
+    void onResponseContent(EventEmitter<Events::Values> e, std::shared_ptr<Flow> flow, int flag, int len, int blen, std::string_view buf);
+
     std::shared_ptr<Flow> createFlow(std::string_view url);
 
   private:
