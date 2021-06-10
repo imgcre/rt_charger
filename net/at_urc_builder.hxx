@@ -16,6 +16,7 @@
 #include <optional>
 #include <utilities/offset.hxx>
 #include <type_traits>
+#include <utilities/mp.hxx>
 
 template<class T>
 struct AtUrcBuilderTraits {
@@ -25,16 +26,12 @@ struct AtUrcBuilderTraits {
 template<class T, class Comp> class AtUrcBuilder;
 
 template<class T>
-struct EventBuilder {
-    EventBuilder(): e(*(std::vector<int>*)nullptr) {
-
-    }
-
-    EventBuilder(std::vector<int>& e): e(e) {
-
-    }
-
+struct EventEmitter {
     template<class U, class Comp> friend class AtUrcBuilder;
+  private:
+    EventEmitter(std::vector<int>& e): e(e) { }
+
+  public:
     auto& operator<<(T t) {
         e.push_back((int)t);
         return *this;
@@ -55,14 +52,11 @@ class AtUrcBuilder: public AtUrcBuilderBase {
     using MemberFunc = void(T::*)(Args...);
     using Traits = AtUrcBuilderTraits<T>;
 
-    AtUrcBuilder(Comp* comp): comp(comp) {
+    AtUrcBuilder(Comp* comp): comp(comp) { }
 
-    }
-
-    using NoArgFunc = MemberFunc<>;
     template<StringLiteral Prefix, StringLiteral Suffix = kEndl>
-    auto& add(NoArgFunc func) requires std::derived_from<T, AtCompBase> {
-        static NoArgFunc f = func;
+    auto& add(MemberFunc<> func) {
+        static auto f = func;
         AtUrcBuilderBase::add(Prefix.value, Suffix.value, [](at_client_t client, const char* data, rt_size_t size){
             run([&](auto inst){
                 ((*inst).*f)();
@@ -71,9 +65,8 @@ class AtUrcBuilder: public AtUrcBuilderBase {
         return *this;
     }
 
-    using SimpleFunc = MemberFunc<std::string_view>;
     template<StringLiteral Prefix, StringLiteral Suffix = kEndl>
-    auto& add(SimpleFunc func) requires std::derived_from<T, AtCompBase> {
+    auto& add(MemberFunc<std::string_view> func) {
         static auto f = func;
         AtUrcBuilderBase::add(Prefix.value, Suffix.value, [](at_client_t client, const char* data, rt_size_t size){
             run([&](auto inst){
@@ -83,9 +76,8 @@ class AtUrcBuilder: public AtUrcBuilderBase {
         return *this;
     }
 
-    using FullFunc = MemberFunc<std::string_view, std::string_view, std::string_view>;
     template<StringLiteral Prefix, StringLiteral Suffix = kEndl>
-    auto& add(FullFunc func) requires std::derived_from<T, AtCompBase> {
+    auto& add(MemberFunc<std::string_view, std::string_view, std::string_view> func) {
         static auto f = func;
         AtUrcBuilderBase::add(Prefix.value, Suffix.value, [](at_client_t client, const char* data, rt_size_t size){
             run([&](auto inst){
@@ -100,55 +92,6 @@ class AtUrcBuilder: public AtUrcBuilderBase {
             UnwrapQuota = 1 << 0,
             RemoveLeadingPad = 1 << 1,
         };
-    };
-
-  private:
-    template<class Slots>
-    struct ArgMapper { };
-
-    template<class SlotType, class SlotCntType, SlotCntType SlotCnt>
-    struct ArgMapper<LimitedSlots<SlotType, SlotCntType, SlotCnt>> {
-        ArgMapper(std::shared_ptr<T> inst, std::optional<Offset<T, LimitedSlots<SlotType, SlotCntType, SlotCnt>>> slotOffset): inst(inst), slotOffset(slotOffset) { }
-
-        template<class X> requires std::same_as<std::shared_ptr<SlotType>, X>
-        std::tuple<X, bool> operator()(X x, std::string_view a) {
-            slotId = parse<int>(a);
-            if(!slotOffset)
-                throw std::runtime_error{"slots not set"};
-            return {slotOffset->recover(*inst).acuqire(*slotId), true};
-        }
-
-        template<class X>
-        struct EventBuilderInfo: public std::false_type { };
-
-        template<class E>
-        struct EventBuilderInfo<EventBuilder<E>>: public std::true_type {
-            using Element = E;
-        };
-
-        template<class X> requires(EventBuilderInfo<X>::value)
-        std::tuple<X, bool> operator()(X x, std::string_view a) {
-            return {X(events), false};
-        }
-
-        template<class X> requires(!std::same_as<std::shared_ptr<SlotType>, X> && !EventBuilderInfo<X>::value)
-        std::tuple<X, bool> operator()(X x, std::string_view a) {
-            return {parse<X>(a), true};
-        }
-
-        std::optional<int> getSlotId() {
-            return slotId;
-        }
-
-        std::vector<int> getEvents() {
-            return move(events);
-        }
-
-      private:
-        std::shared_ptr<T> inst;
-        std::optional<Offset<T, LimitedSlots<SlotType, SlotCntType, SlotCnt>>> slotOffset;
-        std::optional<int> slotId;
-        std::vector<int> events = {};
     };
     
   public:
@@ -174,8 +117,6 @@ class AtUrcBuilder: public AtUrcBuilderBase {
     //     return *this;
     // }
 
-    static constexpr auto kDefaultOpt = (typename Options::Values)(Options::UnwrapQuota | Options::RemoveLeadingPad);
-
     template<class R, class... Args>
     using ProbedMemberFunc = R(T::*)(Args...);
 
@@ -184,54 +125,96 @@ class AtUrcBuilder: public AtUrcBuilderBase {
 
     template<class F> struct IsProbedMemberFunc: public std::false_type { };
     template<class R, class... Args> struct IsProbedMemberFunc<ProbedMemberFunc<R, Args...>>: public std::true_type { };
-    template<class F> auto wrapUp(F func) requires(IsProbedMemberFunc<F>::value) { return func; }
-    template<class F> auto wrapUp(F func) requires(!IsProbedMemberFunc<F>::value) { return std::function{func}; }
+
+    template<class F> auto wrapUp(F func) { 
+        if constexpr(IsProbedMemberFunc<F>::value) {
+            return func; 
+        } else {
+            return std::function{func};
+        }
+        
+    }
+
+    static constexpr auto kDefaultOpt = (typename Options::Values)(Options::UnwrapQuota | Options::RemoveLeadingPad);
 
     template<StringLiteral Prefix, StringLiteral Suffix, class F>
     auto& probe(F func, typename Options::Values opt = kDefaultOpt) {
-        probeI<Prefix, Suffix>(wrapUp(func), defaultSlotsOffset, defaultEventOffset, std::nullopt, opt);
+        probeInternal<Prefix, Suffix>(wrapUp(func), defaultSlotsOffset, defaultEventOffset, std::nullopt, opt);
         return *this;
     }
 
     template<StringLiteral Prefix, StringLiteral Suffix, class F>
     auto& probe(F func, int offset, typename Options::Values opt = kDefaultOpt) {
-        probeI<Prefix, Suffix>(wrapUp(func), defaultSlotsOffset, defaultEventOffset, offset, opt);
+        probeInternal<Prefix, Suffix>(wrapUp(func), defaultSlotsOffset, defaultEventOffset, offset, opt);
         return *this;
     }
 
-    template<StringLiteral Prefix, StringLiteral Suffix, class SlotType, class SlotCntType, SlotCntType SlotCnt, class F>
-    auto& probe(F func, LimitedSlots<SlotType, SlotCntType, SlotCnt>& slots, typename Options::Values opt = kDefaultOpt) {
-        probeI<Prefix, Suffix>(wrapUp(func), std::optional{Offset(*(T*)comp, slots)}, defaultEventOffset, std::nullopt, opt);
+    template<StringLiteral Prefix, StringLiteral Suffix, class Slots, class F>
+    auto& probe(F func, Slots& slots, typename Options::Values opt = kDefaultOpt) {
+        probeInternal<Prefix, Suffix>(wrapUp(func), std::optional{Offset(*(T*)comp, slots)}, defaultEventOffset, std::nullopt, opt);
         return *this;
     }
 
-    template<StringLiteral Prefix, StringLiteral Suffix, class SlotType, class SlotCntType, SlotCntType SlotCnt, class F>
-    auto& probe(F func, LimitedSlots<SlotType, SlotCntType, SlotCnt>& slots, int offset, typename Options::Values opt = kDefaultOpt) {
-        probeI<Prefix, Suffix>(wrapUp(func), std::optional{Offset(*(T*)comp, slots)}, defaultEventOffset, offset, opt);
+    template<StringLiteral Prefix, StringLiteral Suffix, class Slots, class F>
+    auto& probe(F func, Slots& slots, int offset, typename Options::Values opt = kDefaultOpt) {
+        probeInternal<Prefix, Suffix>(wrapUp(func), std::optional{Offset(*(T*)comp, slots)}, defaultEventOffset, offset, opt);
         return *this;
     }
 
-    template<StringLiteral Prefix, StringLiteral Suffix, class SlotType, class SlotCntType, SlotCntType SlotCnt, class F>
-    auto& probe(F func, LimitedSlots<SlotType, SlotCntType, SlotCnt>& slots, EventSet& event, int offset, typename Options::Values opt = kDefaultOpt) {
-        probeI<Prefix, Suffix>(wrapUp(func), std::optional{Offset(*(T*)comp, slots)}, std::optional{Offset(*(T*)comp, event)}, offset, opt);
+    template<StringLiteral Prefix, StringLiteral Suffix, class Slots, class F>
+    auto& probe(F func, Slots& slots, EventSet& event, int offset, typename Options::Values opt = kDefaultOpt) {
+        probeInternal<Prefix, Suffix>(wrapUp(func), std::optional{Offset(*(T*)comp, slots)}, std::optional{Offset(*(T*)comp, event)}, offset, opt);
         return *this;
     }
 
   private:
-    template<StringLiteral Prefix, StringLiteral Suffix, class SlotType, class SlotCntType, SlotCntType SlotCnt, class F>
-    void probeI(
+    template<class Slots> requires(SlotsInfo<Slots>::value)
+    struct ArgMapper {
+        ArgMapper(std::shared_ptr<T> inst, std::optional<Offset<T, Slots>> slotOffset): inst(inst), slotOffset(slotOffset) { }
+
+        template<class X>
+        std::tuple<X, bool> operator()(std::string_view a) {
+            if constexpr(std::same_as<typename SlotsInfo<Slots>::Element, X>) {
+                slotId = parse<int>(a);
+                if(!slotOffset)
+                    throw std::runtime_error{"slots not set"};
+                return {slotOffset->recover(*inst).acuqire(*slotId), true};
+            } else if constexpr(SpecOf<X, EventEmitter>) {
+                return {X(events), false};
+            } else {
+                return {parse<X>(a), true};
+            }
+        }
+
+        std::optional<int> getSlotId() {
+            return slotId;
+        }
+
+        std::vector<int> getEvents() {
+            return move(events);
+        }
+
+      private:
+        std::shared_ptr<T> inst;
+        std::optional<Offset<T, Slots>> slotOffset;
+        std::optional<int> slotId;
+        std::vector<int> events = {};
+    };
+
+    template<StringLiteral Prefix, StringLiteral Suffix, class Slots, class F>
+    void probeInternal(
       F func, 
-      std::optional<Offset<T, LimitedSlots<SlotType, SlotCntType, SlotCnt>>> slotsOffset, 
+      std::optional<Offset<T, Slots>> slotsOffset, 
       std::optional<Offset<T, EventSet>> eventOffset, 
-      std::optional<int> offset = {}, 
-      typename Options::Values opt = kDefaultOpt) {
+      std::optional<int> offset, 
+      typename Options::Values opt) {
         static auto f = func;
         static auto o = (int)opt;
         static auto oSlots = slotsOffset;
         static auto oEvent = eventOffset;
         static auto ost = offset;
         AtUrcBuilderBase::add(Prefix.value, Suffix.value, [](at_client_t client, const char* data, rt_size_t size) {
-            using Mapper = ArgMapper<LimitedSlots<SlotType, SlotCntType, SlotCnt>>;
+            using Mapper = ArgMapper<Slots>;
             runProbe<Prefix, Suffix, Mapper>([&](auto inst) {
                 return Mapper{inst, oSlots};
             }, f, client, data, size, o, [&](auto inst, auto m, auto result) {
@@ -240,7 +223,6 @@ class AtUrcBuilder: public AtUrcBuilderBase {
                 auto mEvents = m.getEvents();
                 auto slotId = 0;
                 if(m.getSlotId()) slotId = *m.getSlotId();
-
                 result.insert(result.end(), mEvents.begin(), mEvents.end()); //TODO: 重构 使用range
                 for(const auto r: result)
                     bits |= 1 << (r + slotId);
@@ -263,82 +245,62 @@ class AtUrcBuilder: public AtUrcBuilderBase {
         }
     }
 
-    template<class R, class B, class Arg>
-    struct ProbeResultHandler {
-
-        ProbeResultHandler(B bound, Arg arg): bound(std::move(bound)), arg(std::move(arg)) {}
-
-        std::vector<int> operator()() requires(std::is_void_v<R>) {
-            std::apply(bound, arg);
+    template<class B, class... Args>
+    static std::vector<int> invoke(B bound, Args&&... args) {
+        using R = decltype(std::invoke(bound, args...));
+        if constexpr(std::is_void_v<R>) {
+            std::invoke(bound, args...);
             return {};
+        } else {
+            auto r = std::invoke(bound, args...);
+            if constexpr(EnumOrIntergral<R>) {
+                return {r};
+            } else if constexpr(SpecOf<R, std::optional>) {
+                auto result = std::vector<int>{};
+                if(r) result.push_back(*r);
+                return result;
+            } else if constexpr(SpecOf<R, std::vector>) {
+                return r;
+            }
         }
+    }
 
-        std::vector<int> operator()() requires EnumOrIntergral<R> {
-            auto r = std::apply(bound, arg);
-            return {r};
-        }
-
-        enum class Type { Unknown, Optional, Vector };
-        template<class> struct Info { static constexpr Type kType = Type::Unknown; };
-        template<class E> struct Info<std::optional<E>> { static constexpr Type kType = EnumOrIntergral<E> ? Type::Optional : Type::Unknown; };
-        template<class E> struct Info<std::vector<E>> { static constexpr Type kType = EnumOrIntergral<E> ? Type::Vector : Type::Unknown; };
-
-        std::vector<int> operator()() requires(Info<R>::kType == Type::Optional) {
-            auto r = std::apply(bound, arg);
-            auto result = std::vector<int>{};
-            if(r) result.push_back(*r);
-            return result;
-        }
-
-        std::vector<int> operator()() requires(Info<R>::kType == Type::Vector) {
-            auto r = std::apply(bound, arg);
+    template<class M>
+    struct ArgProvider {
+        ArgProvider(M& m, std::vector<std::string> argStrs, int opt): m(m), argStrs(std::move(argStrs)), opt(opt) { }
+        template<class Arg>
+        Arg operator()() {
+            auto&& [r, next] = m.template operator()<Arg>(PreprocessArg(std::string_view{argStrs[i]}, opt));
+            if(next) i++;
             return r;
         }
-
-      private:
-        B bound;
-        Arg arg;
+        M& m;
+        std::vector<std::string> argStrs;
+        int opt;
+        int i = 0;
     };
 
-    template<class F> struct ProbedFuncInfo;
-    template<class R, class... Args>
-    struct ProbedFuncInfo<ProbedMemberFunc<R, Args...>> {
-        static constexpr int kArgsSize = sizeof...(Args);
-        using Tuple = std::tuple<Args...>;
+    template<class R, class P, class... Args>
+    static std::vector<int> invokeUrcCallback(ProbedMemberFunc<R, Args...> f, std::shared_ptr<T> t, P& p) {
+        return invoke(std::bind_front(f, t.get()), p.template operator()<Args>()...);
+    }
 
-        static auto tryBind(ProbedMemberFunc<R, Args...> f, std::shared_ptr<T> inst) {
-            return std::bind_front(f, inst.get());
-        }
-    };
+    template<class R, class P, class... Args>
+    static std::vector<int> invokeUrcCallback(ProbedLambdaFunc<R, Args...> f, std::shared_ptr<T> t, P& p) {
+        return invoke(f, p.template operator()<Args>()...);
+    }
 
-    template<class R, class... Args>
-    struct ProbedFuncInfo<ProbedLambdaFunc<R, Args...>> {
-        static constexpr int kArgsSize = sizeof...(Args);
-        using Tuple = std::tuple<Args...>;
-
-        static auto tryBind(ProbedLambdaFunc<R, Args...> f, std::shared_ptr<T> inst) {
-            return f;
-        };
-    };
+    template<class F> struct ProbedArgCount;
+    template<class R, class... Args> struct ProbedArgCount<ProbedMemberFunc<R, Args...>>: public std::integral_constant<int, sizeof...(Args)> {};
+    template<class R, class... Args> struct ProbedArgCount<ProbedLambdaFunc<R, Args...>>: public std::integral_constant<int, sizeof...(Args)> {};
 
     template<StringLiteral Prefix, StringLiteral Suffix, class M, class F>
     static void runProbe(std::function<M(std::shared_ptr<T>)> maker, F f, at_client_t client, const char* data, rt_size_t size, int opt, std::function<void(std::shared_ptr<T>, M&, std::vector<int>)> then = {}) {
         run([&](auto inst){
-            using Info = ProbedFuncInfo<F>;
-            auto argStrs = getArgs<Prefix, Suffix>(data, size, Info::kArgsSize);
             auto m = maker(inst);
-            int i = 0;
-            auto zipper = [&](auto x) {
-                auto&& [r, next] = m(x, PreprocessArg(std::string_view{argStrs[i]}, opt));
-                if(next) i++;
-                return r;
-            };
-            auto args = std::apply([&](auto ...x) {
-                return std::make_tuple(zipper(x)...);
-            }, typename Info::Tuple()); //TODO: 这里要重构
-            auto bound = Info::tryBind(f, inst);
-            auto handler = ProbeResultHandler<decltype(std::apply(bound, args)), decltype(bound), decltype(args)>(std::move(bound), std::move(args));
-            if(then) then(inst, m, handler());
+            auto p = ArgProvider{m, getArgs<Prefix, Suffix>(data, size, ProbedArgCount<F>::value), opt};
+            auto result = invokeUrcCallback(f, inst, p);
+            if(then) then(inst, m, std::move(result));
         }, client);
     }
 
