@@ -6,6 +6,7 @@
 #include <tuple>
 #include <iterator>
 #include <algorithm>
+#include <type_traits>
 
 template<class SlotType, class SlotCntType, SlotCntType SlotCnt>
 class LimitedSlots {
@@ -44,3 +45,11 @@ class LimitedSlots {
 
 template<class SlotType>
 using SingleSlot = LimitedSlots<SlotType, uint8_t, 1>;
+
+template<class Slots>
+struct SlotsInfo: std::false_type {};
+
+template<class SlotType, class SlotCntType, SlotCntType SlotCnt>
+struct SlotsInfo<LimitedSlots<SlotType, SlotCntType, SlotCnt>>: std::true_type {
+    using Element = std::shared_ptr<SlotType>;
+};
