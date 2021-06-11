@@ -2,7 +2,7 @@
 #include <rtthread.h>
 #include <termios/cmd.hxx>
 
-static void test_ws2812(int argc, char** argv) {
+static void ws2812(int argc, char** argv) {
     auto ws2812 = Preset::Ws2812::get();
     Cmd{argc, argv}([&](Cmd& cmd) {
         auto i = cmd.get<int>();
@@ -14,4 +14,4 @@ static void test_ws2812(int argc, char** argv) {
     });
 }
 
-MSH_CMD_EXPORT(test_ws2812, );
+MSH_CMD_EXPORT(ws2812, );

@@ -11,7 +11,7 @@ struct test {
 };
 
 
-static void test_port() {
+static void port() {
     test<Preset::Port::A>{}.print();
     test<2_ap>{}.print();
     test<2_rp>{}.print();
@@ -23,4 +23,4 @@ static void test_port() {
 
 
 
-MSH_CMD_EXPORT(test_port, );
+MSH_CMD_EXPORT(port, );

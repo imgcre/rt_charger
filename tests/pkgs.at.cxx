@@ -5,7 +5,7 @@
 
 constexpr auto kPwrPin = GET_PIN(B, 2);
 
-int init_test_at() {
+static int init_at() {
     rt_pin_mode(kPwrPin, PIN_MODE_OUTPUT);
     rt_pin_write(kPwrPin, PIN_HIGH);
     struct serial_configure conf = RT_SERIAL_CONFIG_DEFAULT;
@@ -18,4 +18,4 @@ int init_test_at() {
     return RT_EOK;
 }
 
-INIT_APP_EXPORT(init_test_at);
+INIT_APP_EXPORT(init_at);

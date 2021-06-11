@@ -6,11 +6,11 @@
 
 using namespace std;
 
-static void test_relay(int argc, char** argv) {
+static void relay(int argc, char** argv) {
     Cmd{argc, argv}([&](Cmd& cmd){
         auto port = cmd.get<Port>();
         auto relay = Port::to<Preset::Relay>(port);
-        cmd.select<string>({
+        cmd.select({
             {"on", [&]{
                 relay->value = Relay::Value::On;
             }},
@@ -21,4 +21,4 @@ static void test_relay(int argc, char** argv) {
     });
 }
 
-MSH_CMD_EXPORT(test_relay, );
+MSH_CMD_EXPORT(relay, );

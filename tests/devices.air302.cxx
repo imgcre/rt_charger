@@ -8,16 +8,16 @@
 
 using namespace std; 
 
-static int init_test_air302() {
+static int init_air302() {
     auto air302 = Preset::Air302::get();
     air302->init();
     rt_kprintf("air302 init OK!\n");
     return RT_EOK;
 }
 
-INIT_APP_EXPORT(init_test_air302);
+INIT_APP_EXPORT(init_air302);
 
-static void test_air_302(int argc, char** argv) {
+static void air302(int argc, char** argv) {
     static std::shared_ptr<MqttClient> mqtt;
     auto air302 = Preset::Air302::get();
     Cmd{argc, argv}([&](Cmd& cmd){
@@ -61,7 +61,7 @@ static void test_air_302(int argc, char** argv) {
     });
 }
 
-MSH_CMD_EXPORT(test_air_302, );
+MSH_CMD_EXPORT(air302, );
 
 static void test_air_302_make() {
     try {

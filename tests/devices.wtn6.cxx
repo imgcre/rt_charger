@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void test_wtn6(int argc, char** argv) {
+static void wtn6(int argc, char** argv) {
     auto wtn6 = Preset::Wtn6::get();
     Cmd{argc, argv}([&](Cmd& cmd) {
         auto vcode = cmd.get<rt_uint8_t>();
@@ -13,4 +13,4 @@ void test_wtn6(int argc, char** argv) {
     });
 }
 
-MSH_CMD_EXPORT(test_wtn6, )
+MSH_CMD_EXPORT(wtn6, )

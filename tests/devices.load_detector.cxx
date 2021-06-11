@@ -5,7 +5,7 @@
 #include <ranges>
 using namespace std;
 
-static int init_test_load_detector() {
+static int init_load_detector() {
     Port::forEach([]<class T>(T){
         auto lodet = Preset::LoadDetector<T::Port>::get();
         lodet->oState += [=](auto value){
@@ -13,16 +13,7 @@ static int init_test_load_detector() {
             rt_kprintf("ldt[%d] -> %d\n", i, value);
         };
     });
-    // for(auto i: views::iota(0, Config::Bsp::kPortNum)) {
-    //     magic_switch<Config::Bsp::kPortNum>{}([&](auto v) {
-    //         auto lodet = Preset::LoadDetector<RawPort(decltype(v)::value)>::get();
-    //         lodet->oState += [=](auto value){
-    //             if(!value) return;
-    //             rt_kprintf("ldt[%d] -> %d\n", i, value);
-    //         };
-    //     }, i);
-    // }
     return RT_EOK;
 }
 
-INIT_APP_EXPORT(init_test_load_detector);
+INIT_APP_EXPORT(init_load_detector);

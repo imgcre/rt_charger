@@ -19,7 +19,7 @@ void f() {
 
 }
 
-void test_except() {
+static void test_except() {
     rt_kprintf("Test::f: %s\n", typeid(&Test::f).name());
     auto f = &Test::f;
     auto t = Test{};
