@@ -49,6 +49,11 @@ menu "App Config"
                     bool "Enable Cmd test"
                     default n
             endmenu
+            menu "Os"
+                config TEST_OS_EVENT_ALLOCATOR
+                    bool "Enable EventAllocator test"
+                    default n
+            endmenu
         endif
 endmenu
 
