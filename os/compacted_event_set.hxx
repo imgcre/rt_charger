@@ -5,12 +5,15 @@
 #include <chrono>
 
 class CompactedEventSet: public std::enable_shared_from_this<CompactedEventSet> {
+    friend class EventAllocator;
     friend class Event;
     static constexpr std::size_t N = 32;
-  public:
+  private:
     CompactedEventSet() = default;
     CompactedEventSet(const CompactedEventSet&) = delete;
+  public:
     ~CompactedEventSet();
+  private:
     bool full();
     Event alloc();
   private:

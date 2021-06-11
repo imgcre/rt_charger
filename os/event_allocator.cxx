@@ -18,7 +18,7 @@ Event EventAllocator::alloc() {
         }
     }
     if(!avaliableEventSet) {
-        avaliableEventSet = make_shared<CompactedEventSet>();
+        avaliableEventSet = shared_ptr<CompactedEventSet>{new CompactedEventSet()};
         eventSets.push_back(avaliableEventSet);
     }
     return avaliableEventSet->alloc();
