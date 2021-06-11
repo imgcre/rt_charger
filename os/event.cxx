@@ -1,13 +1,18 @@
+#include "compacted_event_set.hxx"
 #include "event.hxx"
 
-Event::Event() {
+Event::Event(OuterPtr outer, uint8_t bit): Base(outer), bit(bit) {
 
+}
+
+Event::~Event() {
+    outer->free(bit);
 }
 
 void Event::set() {
-    rt_event_send(event.get(), 1);
+    outer->set(bit);
 }
 
-void Event::wait() {
-    rt_event_recv(event.get(), 1, RT_EVENT_FLAG_AND | RT_EVENT_FLAG_CLEAR, RT_WAITING_FOREVER, nullptr);
+void Event::wait(std::chrono::milliseconds timeout) {
+    outer->wait(bit, timeout);
 }

@@ -3,7 +3,7 @@
 #include <queue>
 #include <Mutex.h>
 #include <Lock.h>
-#include "event.hxx"
+#include "event_allocator.hxx"
 
 template <class T>
 class Queue {
@@ -35,5 +35,5 @@ class Queue {
   private:
     std::queue<T> q = {};
     rtthread::Mutex m = {};
-    Event e = {};
+    Event e = EventAllocator::alloc();
 };

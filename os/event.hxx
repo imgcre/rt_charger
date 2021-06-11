@@ -1,15 +1,16 @@
 #pragma once
+#include <utilities/smart_nested.hxx>
+#include <cstddef>
+#include <chrono>
+class CompactedEventSet;
 
-#include <rtthread.h>
-#include <memory>
-
-class Event {
+class Event: public SmartNested<CompactedEventSet> {
   public:
-    Event();
+    Event(OuterPtr outer, uint8_t bit);
+    Event(const Event& other) = delete;
+    ~Event();
     void set();
-    void wait();
+    void wait(std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
   private:
-    std::shared_ptr<rt_event> event = std::shared_ptr<rt_event>(rt_event_create("tt", RT_IPC_FLAG_FIFO), [](auto p) {
-        rt_event_delete(p);
-    });
+    uint8_t bit;
 };
