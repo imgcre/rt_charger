@@ -201,7 +201,6 @@
 
 /* Devices */
 
-#define TEST_DEVICES_RELAY
 
 /* Hal */
 
@@ -214,5 +213,9 @@
 
 /* Termios */
 
+
+/* Os */
+
+#define TEST_OS_EVENT_ALLOCATOR
 
 #endif
