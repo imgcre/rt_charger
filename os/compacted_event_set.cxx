@@ -39,5 +39,8 @@ void CompactedEventSet::set(uint8_t bit) {
 
 void CompactedEventSet::wait(uint8_t bit, chrono::milliseconds timeout) {
     auto rt_timeout = timeout == chrono::milliseconds::max() ? RT_WAITING_FOREVER : timeout.count();
-    rt_event_recv(event, 1 << bit, RT_EVENT_FLAG_AND | RT_EVENT_FLAG_CLEAR, rt_timeout, nullptr);
+    auto ret = rt_event_recv(event, 1 << bit, RT_EVENT_FLAG_AND | RT_EVENT_FLAG_CLEAR, rt_timeout, nullptr);
+    if(ret != RT_EOK) {
+        throw runtime_error{"event timeout"};
+    }
 }
